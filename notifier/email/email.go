@@ -14,18 +14,18 @@ import (
 
 // EmailNotifierConfig 邮件通知器配置
 type EmailNotifierConfig struct {
-	Enabled     bool     `json:"enabled"`
-	SMTPHost    string   `json:"smtp_host"`
-	SMTPPort    int      `json:"smtp_port"`
-	Username    string   `json:"username"`
-	Password    string   `json:"password"`
-	From        string   `json:"from"`
-	To          []string `json:"to"`
-	CC          []string `json:"cc,omitempty"`
-	BCC         []string `json:"bcc,omitempty"`
-	UseTLS      bool     `json:"use_tls"`
-	UseSSL      bool     `json:"use_ssl"`
-	MessageType string   `json:"message_type"`
+	Enabled     bool     `yaml:"enabled" json:"enabled"`
+	SMTPHost    string   `yaml:"smtp_host" json:"smtp_host"`
+	SMTPPort    int      `yaml:"smtp_port" json:"smtp_port"`
+	Username    string   `yaml:"username" json:"username"`
+	Password    string   `yaml:"password" json:"password"`
+	From        string   `yaml:"from" json:"from"`
+	To          []string `yaml:"to" json:"to"`
+	CC          []string `yaml:"cc,omitempty" json:"cc,omitempty"`
+	BCC         []string `yaml:"bcc,omitempty" json:"bcc,omitempty"`
+	UseTLS      bool     `yaml:"use_tls" json:"use_tls"`
+	UseSSL      bool     `yaml:"use_ssl" json:"use_ssl"`
+	MessageType string   `yaml:"message_type" json:"message_type"`
 }
 
 // IsEnabled 检查是否启用

@@ -20,11 +20,11 @@ import (
 
 // FeishuNotifierConfig 飞书通知器配置
 type FeishuNotifierConfig struct {
-	Enabled     bool   `json:"enabled"`
-	WebhookURL  string `json:"webhook_url"`
-	Secret      string `json:"secret,omitempty"`
-	Proxy       string `json:"proxy,omitempty"`
-	MessageType string `json:"message_type"`
+	Enabled     bool   `yaml:"enabled" json:"enabled"`
+	WebhookURL  string `yaml:"webhook_url" json:"webhook_url"`
+	Secret      string `yaml:"secret,omitempty" json:"secret,omitempty"`
+	Proxy       string `yaml:"proxy,omitempty" json:"proxy,omitempty"`
+	MessageType string `yaml:"message_type" json:"message_type"`
 }
 
 // IsEnabled 检查是否启用

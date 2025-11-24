@@ -15,15 +15,15 @@ import (
 
 // WebhookNotifierConfig Webhook通知器配置
 type WebhookNotifierConfig struct {
-	Enabled       bool              `json:"enabled"`
-	URL           string            `json:"url"`
-	Method        string            `json:"method"`            // GET, POST, PUT 等
-	Headers       map[string]string `json:"headers,omitempty"` // 自定义HTTP头
-	Timeout       int               `json:"timeout,omitempty"` // 超时时间（秒）
-	RetryCount    int               `json:"retry_count,omitempty"`
-	RetryInterval int               `json:"retry_interval,omitempty"` // 重试间隔（秒）
-	ContentType   string            `json:"content_type,omitempty"`
-	Secret        string            `json:"secret,omitempty"` // 用于签名的密钥
+	Enabled       bool              `yaml:"enabled" json:"enabled"`
+	URL           string            `yaml:"url" json:"url"`
+	Method        string            `yaml:"method" json:"method"`                       // GET, POST, PUT 等
+	Headers       map[string]string `yaml:"headers,omitempty" json:"headers,omitempty"` // 自定义HTTP头
+	Timeout       int               `yaml:"timeout,omitempty" json:"timeout,omitempty"` // 超时时间（秒）
+	RetryCount    int               `yaml:"retry_count,omitempty" json:"retry_count,omitempty"`
+	RetryInterval int               `yaml:"retry_interval,omitempty" json:"retry_interval,omitempty"` // 重试间隔（秒）
+	ContentType   string            `yaml:"content_type,omitempty" json:"content_type,omitempty"`
+	Secret        string            `yaml:"secret,omitempty" json:"secret,omitempty"` // 用于签名的密钥
 }
 
 // IsEnabled 检查是否启用

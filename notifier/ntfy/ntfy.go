@@ -27,14 +27,14 @@ func validatePhoneNumber(phone string) bool {
 
 // NtfyNotifierConfig ntfy通知器配置
 type NtfyNotifierConfig struct {
-	Enabled   bool   `json:"enabled"`
-	ServerURL string `json:"server_url,omitempty"`
-	Topic     string `json:"topic"`
-	Username  string `json:"username,omitempty"`
-	Password  string `json:"password,omitempty"`
-	ClickURL  string `json:"click_url,omitempty"`
-	Priority  string `json:"priority,omitempty"`
-	Proxy     string `json:"proxy,omitempty"`
+	Enabled   bool   `yaml:"enabled" json:"enabled"`
+	ServerURL string `yaml:"server_url,omitempty" json:"server_url,omitempty"`
+	Topic     string `yaml:"topic" json:"topic"`
+	Username  string `yaml:"username,omitempty" json:"username,omitempty"`
+	Password  string `yaml:"password,omitempty" json:"password,omitempty"`
+	ClickURL  string `yaml:"click_url,omitempty" json:"click_url,omitempty"`
+	Priority  string `yaml:"priority,omitempty" json:"priority,omitempty"`
+	Proxy     string `yaml:"proxy,omitempty" json:"proxy,omitempty"`
 }
 
 // IsEnabled 检查是否启用

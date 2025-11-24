@@ -17,16 +17,16 @@ import (
 
 // WecomNotifierConfig 企业微信通知器配置
 type WecomNotifierConfig struct {
-	Enabled     bool   `json:"enabled"`
-	WebhookURL  string `json:"webhook_url"`
-	AgentID     string `json:"agent_id,omitempty"`
-	CorpID      string `json:"corp_id,omitempty"`
-	CorpSecret  string `json:"corp_secret,omitempty"`
-	ToUser      string `json:"to_user,omitempty"`
-	ToParty     string `json:"to_party,omitempty"`
-	ToTag       string `json:"to_tag,omitempty"`
-	Proxy       string `json:"proxy,omitempty"`
-	MessageType string `json:"message_type"`
+	Enabled     bool   `yaml:"enabled" json:"enabled"`
+	WebhookURL  string `yaml:"webhook_url" json:"webhook_url"`
+	AgentID     string `yaml:"agent_id,omitempty" json:"agent_id,omitempty"`
+	CorpID      string `yaml:"corp_id,omitempty" json:"corp_id,omitempty"`
+	CorpSecret  string `yaml:"corp_secret,omitempty" json:"corp_secret,omitempty"`
+	ToUser      string `yaml:"to_user,omitempty" json:"to_user,omitempty"`
+	ToParty     string `yaml:"to_party,omitempty" json:"to_party,omitempty"`
+	ToTag       string `yaml:"to_tag,omitempty" json:"to_tag,omitempty"`
+	Proxy       string `yaml:"proxy,omitempty" json:"proxy,omitempty"`
+	MessageType string `yaml:"message_type" json:"message_type"`
 }
 
 // IsEnabled 检查是否启用

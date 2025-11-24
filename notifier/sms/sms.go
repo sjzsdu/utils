@@ -12,15 +12,15 @@ import (
 
 // SMSNotifierConfig 短信通知器配置
 type SMSNotifierConfig struct {
-	Enabled      bool     `json:"enabled"`
-	Provider     string   `json:"provider"`      // "aliyun", "tencent", "aws", "custom"
-	PhoneNumbers []string `json:"phone_numbers"` // 接收短信的手机号码
-	AccessKey    string   `json:"access_key"`
-	SecretKey    string   `json:"secret_key"`
-	Region       string   `json:"region"`
-	TemplateID   string   `json:"template_id"`
-	Signature    string   `json:"signature"`
-	CustomAPIURL string   `json:"custom_api_url"` // 自定义API地址
+	Enabled      bool     `yaml:"enabled" json:"enabled"`
+	Provider     string   `yaml:"provider" json:"provider"`           // "aliyun", "tencent", "aws", "custom"
+	PhoneNumbers []string `yaml:"phone_numbers" json:"phone_numbers"` // 接收短信的手机号码
+	AccessKey    string   `yaml:"access_key" json:"access_key"`
+	SecretKey    string   `yaml:"secret_key" json:"secret_key"`
+	Region       string   `yaml:"region" json:"region"`
+	TemplateID   string   `yaml:"template_id" json:"template_id"`
+	Signature    string   `yaml:"signature" json:"signature"`
+	CustomAPIURL string   `yaml:"custom_api_url" json:"custom_api_url"` // 自定义API地址
 }
 
 // IsEnabled 检查是否启用
