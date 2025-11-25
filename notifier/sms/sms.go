@@ -13,7 +13,7 @@ import (
 // SMSNotifierConfig 短信通知器配置
 type SMSNotifierConfig struct {
 	Enabled      bool     `yaml:"enabled" json:"enabled"`
-	Provider     string   `yaml:"provider" json:"provider"`           // "aliyun", "tencent", "aws", "custom"
+	Provider     string   `yaml:"provider" json:"provider"`      // "aliyun", "tencent", "aws", "custom"
 	PhoneNumbers []string `yaml:"phone_numbers" json:"phone_numbers"` // 接收短信的手机号码
 	AccessKey    string   `yaml:"access_key" json:"access_key"`
 	SecretKey    string   `yaml:"secret_key" json:"secret_key"`

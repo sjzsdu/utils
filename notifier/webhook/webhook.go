@@ -17,7 +17,7 @@ import (
 type WebhookNotifierConfig struct {
 	Enabled       bool              `yaml:"enabled" json:"enabled"`
 	URL           string            `yaml:"url" json:"url"`
-	Method        string            `yaml:"method" json:"method"`                       // GET, POST, PUT 等
+	Method        string            `yaml:"method" json:"method"`            // GET, POST, PUT 等
 	Headers       map[string]string `yaml:"headers,omitempty" json:"headers,omitempty"` // 自定义HTTP头
 	Timeout       int               `yaml:"timeout,omitempty" json:"timeout,omitempty"` // 超时时间（秒）
 	RetryCount    int               `yaml:"retry_count,omitempty" json:"retry_count,omitempty"`
