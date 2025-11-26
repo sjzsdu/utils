@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/sjzsdu/utils/crawler/pkg/models"
+	"github.com/sjzsdu/utils/crawler/pkg/scheduler"
 )
 
 // engineImpl 是 Engine 接口的实现
@@ -29,11 +30,33 @@ type engineImpl struct {
 	// 互斥锁
 	mu sync.RWMutex
 
-	// 工作池
-	wg sync.WaitGroup
-
 	// 运行状态
 	running bool
+
+	// 调度器
+	scheduler scheduler.Scheduler
+}
+
+// crawlTask 实现了 scheduler.Task 接口，用于爬取数据源
+type crawlTask struct {
+	source Source
+	engine *engineImpl
+}
+
+// ID 返回任务的唯一标识符
+func (t *crawlTask) ID() string {
+	return t.source.GetName()
+}
+
+// Execute 执行爬取任务
+func (t *crawlTask) Execute(ctx context.Context) error {
+	t.engine.fetchAndProcess(t.source)
+	return nil
+}
+
+// Interval 返回任务的执行间隔
+func (t *crawlTask) Interval() int {
+	return t.source.GetInterval()
 }
 
 // NewEngine 创建一个新的爬取引擎实例
@@ -46,6 +69,7 @@ func NewEngine(cache Cache) Engine {
 		ctx:         ctx,
 		cancel:      cancel,
 		running:     false,
+		scheduler:   scheduler.NewInMemoryScheduler(),
 	}
 }
 
@@ -60,6 +84,16 @@ func (e *engineImpl) RegisterSource(source Source) error {
 	}
 
 	e.sources[name] = source
+
+	// 如果引擎正在运行，将任务添加到调度器
+	if e.running {
+		task := &crawlTask{
+			source: source,
+			engine: e,
+		}
+		return e.scheduler.AddTask(task)
+	}
+
 	return nil
 }
 
@@ -73,6 +107,12 @@ func (e *engineImpl) UnregisterSource(name string) error {
 	}
 
 	delete(e.sources, name)
+
+	// 如果引擎正在运行，从调度器中移除任务
+	if e.running {
+		return e.scheduler.RemoveTask(name)
+	}
+
 	return nil
 }
 
@@ -86,15 +126,22 @@ func (e *engineImpl) Start(ctx context.Context) error {
 	e.running = true
 	e.mu.Unlock()
 
-	// 启动所有数据源的爬取任务
+	// 将所有数据源添加到调度器
 	e.mu.RLock()
 	for _, source := range e.sources {
-		e.wg.Add(1)
-		go e.crawlSource(ctx, source)
+		task := &crawlTask{
+			source: source,
+			engine: e,
+		}
+		if err := e.scheduler.AddTask(task); err != nil {
+			fmt.Printf("Failed to add task for source %s: %v\n", source.GetName(), err)
+			continue
+		}
 	}
 	e.mu.RUnlock()
 
-	return nil
+	// 启动调度器
+	return e.scheduler.Start(ctx)
 }
 
 // Stop 停止爬取引擎
@@ -107,11 +154,13 @@ func (e *engineImpl) Stop() error {
 	e.running = false
 	e.mu.Unlock()
 
-	// 取消所有爬取任务
-	e.cancel()
+	// 停止调度器
+	if err := e.scheduler.Stop(); err != nil {
+		return err
+	}
 
-	// 等待所有爬取任务结束
-	e.wg.Wait()
+	// 取消上下文
+	e.cancel()
 
 	return nil
 }
@@ -180,31 +229,6 @@ func (e *engineImpl) Unsubscribe(sourceName string, ch chan<- []models.Item) err
 	}
 
 	return nil
-}
-
-// crawlSource 爬取指定数据源
-func (e *engineImpl) crawlSource(ctx context.Context, source Source) {
-	defer e.wg.Done()
-
-	interval := time.Duration(source.GetInterval()) * time.Second
-
-	// 创建定时器
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	// 立即执行一次爬取
-	e.fetchAndProcess(source)
-
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		case <-e.ctx.Done():
-			return
-		case <-ticker.C:
-			e.fetchAndProcess(source)
-		}
-	}
 }
 
 // fetchAndProcess 获取并处理数据源

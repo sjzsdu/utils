@@ -108,12 +108,24 @@ classDiagram
         +ParseElement(content []byte, selector string) (*goquery.Selection, error)
         +ExtractText(content []byte, selector string) (string, error)
         +ExtractAttr(content []byte, selector string, attr string) (string, error)
+        +ExtractLinks(content []byte) ([]string, error)
+        +ExtractImages(content []byte) ([]string, error)
+        +FindAll(content []byte, selector string) (*goquery.Selection, error)
+    }
+    
+    class Task {
+        +ID() string
+        +Execute(ctx context.Context) error
+        +Interval() int
     }
     
     class Scheduler {
-        +AddTask(task func())
-        +Start()
-        +Stop()
+        +AddTask(task Task) error
+        +RemoveTask(id string) error
+        +Start(ctx context.Context) error
+        +Stop() error
+        +GetTask(id string) (Task, error)
+        +ListTasks() []Task
     }
     
     %% 具体实现
@@ -142,22 +154,41 @@ classDiagram
     }
     
     class DefaultEngine {
-        +RegisterSource(source Source)
-        +Start(ctx context.Context)
-        +Stop()
-        +GetItems(sourceName string) ([]Item, error)
-        +Subscribe(sourceName string, ch chan<- []Item)
+        +RegisterSource(source Source) error
+        +Start(ctx context.Context) error
+        +Stop() error
+        +FetchItem(ctx context.Context, sourceName string) ([]Item, error)
+        +Subscribe(sourceName string, ch chan<- []Item) error
+        +Unsubscribe(sourceName string, ch chan<- []Item) error
+    }
+    
+    class InMemoryScheduler {
+        +AddTask(task Task) error
+        +RemoveTask(id string) error
+        +Start(ctx context.Context) error
+        +Stop() error
+        +GetTask(id string) (Task, error)
+        +ListTasks() []Task
+    }
+    
+    class CrawlTask {
+        +ID() string
+        +Execute(ctx context.Context) error
+        +Interval() int
     }
     
     %% 关系
     Engine --> Cache
     Engine --> Source
     Engine --> Scheduler
+    Engine --> CrawlTask
     
     GitHubSource --> Source
     NewsSource --> Source
     MemoryCache --> Cache
     DefaultEngine --> Engine
+    InMemoryScheduler --> Scheduler
+    CrawlTask --> Task
     
     Source --> Fetcher
     Source --> Parser
@@ -168,6 +199,7 @@ classDiagram
     Engine --> Item
     Extractor --> Item
     Cache --> Item
+    CrawlTask --> Source
     
     %% 数据源注册
     class SourceRegistry {
@@ -201,11 +233,14 @@ sequenceDiagram
     
     %% 启动阶段
     Client->>Engine: 启动引擎
+    Engine->>Scheduler: 为每个数据源创建CrawlTask
+    Engine->>Scheduler: 调用AddTask()添加所有任务
     Engine->>Scheduler: 启动调度器
     
     %% 爬取周期
-    loop 按数据源间隔循环
-        Scheduler->>Engine: 触发爬取任务
+    loop 按任务间隔循环
+        Scheduler->>Task: 调用Execute()执行任务
+        Task->>Engine: 调用fetchAndProcess()
         Engine->>Source: 获取数据源
         Engine->>Cache: 检查缓存
         alt 缓存未命中或已过期
@@ -224,13 +259,23 @@ sequenceDiagram
         Engine->>Subscriber: 发送Item数据
     end
     
+    %% 动态添加数据源
+    Client->>SourceRegistry: 注册新数据源
+    SourceRegistry->>Engine: 注册数据源
+    Engine->>Scheduler: 为新数据源创建CrawlTask
+    Engine->>Scheduler: 调用AddTask()添加任务
+    
+    %% 动态移除数据源
+    Client->>Engine: 调用UnregisterSource()
+    Engine->>Scheduler: 调用RemoveTask()移除任务
+    
     %% 停止阶段
     Client->>Engine: 停止引擎
-    Engine->>Scheduler: 停止调度器
+    Engine->>Scheduler: 调用Stop()停止调度器
     Engine->>Cache: 关闭缓存
     
     %% 订阅更新
-    Client->>Engine: 订阅数据源更新
+    Client->>Engine: 调用Subscribe()订阅数据源更新
     Engine->>Subscriber: 建立订阅通道
 ```
 
@@ -242,9 +287,13 @@ flowchart TD
     Client["客户端应用"]
     
     %% 核心引擎层
-    Engine["爬取引擎"]
-    Scheduler["调度器"]
+    Engine["爬取引擎 (engine_impl)"]
+    Scheduler["调度器 (in_memory_scheduler)"]
     SourceRegistry["数据源注册表"]
+    
+    %% 任务层
+    Tasks["任务集合"]
+    CrawlTask["CrawlTask"]
     
     %% 数据源层
     Sources["数据源集合"]
@@ -271,6 +320,11 @@ flowchart TD
     Engine --> Sources
     Engine --> Cache
     Engine --> Subscribers
+    Engine --> CrawlTask
+    
+    Scheduler --> Tasks
+    Tasks --> CrawlTask
+    CrawlTask --> Source
     
     SourceRegistry --> Sources
     
@@ -292,10 +346,12 @@ flowchart TD
     %% 组件间依赖关系
     classDef core fill:#f9d5e5,stroke:#333,stroke-width:2px
     classDef component fill:#e5f9d5,stroke:#333,stroke-width:2px
+    classDef task fill:#ffe599,stroke:#333,stroke-width:2px
     classDef external fill:#d5e5f9,stroke:#333,stroke-width:2px
     
     class Engine,Scheduler,SourceRegistry core
     class Fetcher,Parser,Cache component
+    class CrawlTask,Tasks task
     class GitHub,News,Custom,Subscriber1,Subscriber2,Client external
 ```
 
