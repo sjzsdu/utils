@@ -47,14 +47,6 @@ func main() {
 	}
 	defer engine.Unsubscribe("github", githubChan)
 
-	// 订阅新闻数据源的更新
-	newsChan := make(chan []models.Item, 10)
-	if err := engine.Subscribe("news", newsChan); err != nil {
-		fmt.Printf("Failed to subscribe to news: %v\n", err)
-		return
-	}
-	defer engine.Unsubscribe("news", newsChan)
-
 	fmt.Println("Crawler engine started. Waiting for updates...")
 	fmt.Println("Press Ctrl+C to exit.")
 
@@ -63,17 +55,15 @@ func main() {
 		select {
 		case items := <-githubChan:
 			fmt.Printf("\nReceived %d items from GitHub\n", len(items))
-			for i, item := range items[:5] { // 只显示前5条
+			// 只显示前5条或实际数量，避免切片越界
+			maxItems := 5
+			if len(items) < maxItems {
+				maxItems = len(items)
+			}
+			for i, item := range items[:maxItems] {
 				fmt.Printf("%d. %s\n", i+1, item.Title)
 				fmt.Printf("   URL: %s\n", item.URL)
 				fmt.Printf("   Category: %s\n", item.Category)
-			}
-		case items := <-newsChan:
-			fmt.Printf("\nReceived %d items from News\n", len(items))
-			for i, item := range items[:5] { // 只显示前5条
-				fmt.Printf("%d. %s\n", i+1, item.Title)
-				fmt.Printf("   URL: %s\n", item.URL)
-				fmt.Printf("   Content: %s\n", item.Content)
 			}
 		case <-time.After(30 * time.Minute):
 			fmt.Println("Timeout, exiting...")

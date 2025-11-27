@@ -29,16 +29,16 @@ type TencentTabItem struct {
 
 // TencentHeadArticle 腾讯新闻头条文章
 type TencentHeadArticle struct {
-	LiveInfo  string `json:"live_info"`
-	Title     string `json:"title"`
-	Img       string `json:"img"`
-	PubTime   string `json:"pub_time"`
-	MediaName string `json:"media_name"`
+	LiveInfo  string      `json:"live_info"`
+	Title     string      `json:"title"`
+	Img       interface{} `json:"img"` // 改为interface{}类型以适应数组或字符串
+	PubTime   string      `json:"pub_time"`
+	MediaName string      `json:"media_name"`
 }
 
 // TencentData 腾讯新闻数据
 type TencentData struct {
-	ID            int                `json:"id"`
+	ID            string             `json:"id"`
 	Name          string             `json:"name"`
 	Lead          string             `json:"lead"`
 	Cover         *string            `json:"cover"`

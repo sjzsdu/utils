@@ -1,8 +1,11 @@
 package sources
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
 
 	"github.com/sjzsdu/utils/crawler/pkg/models"
@@ -53,6 +56,35 @@ func NewDoubanSource() *DoubanSource {
 			Interval: 3600, // 1小时爬取一次
 		},
 	}
+}
+
+// Fetch 获取豆瓣热门电影数据
+func (s *DoubanSource) Fetch(ctx context.Context) ([]byte, error) {
+	// 创建HTTP请求
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// 设置请求头，模拟移动端访问
+	req.Header.Set("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+
+	client := s.Client
+	if client == nil {
+		client = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return io.ReadAll(resp.Body)
 }
 
 // Parse 解析豆瓣热门电影内容

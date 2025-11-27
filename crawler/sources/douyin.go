@@ -3,6 +3,7 @@ package sources
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"time"
 
@@ -35,7 +36,7 @@ func NewDouyinSource() *DouyinSource {
 	return &DouyinSource{
 		BaseSource: BaseSource{
 			Name:     "douyin",
-			URL:      "https://www.douyin.com/aweme/v1/web/hot/search/list/?device_platform=webapp&aid=6383&channel=channel_pc_web&detail_list=1",
+			URL:      "https://www.douyin.com/aweme/v1/web/hot/search/list/",
 			Interval: 300, // 5分钟爬取一次
 		},
 	}
@@ -43,69 +44,65 @@ func NewDouyinSource() *DouyinSource {
 
 // Fetch 获取抖音热门搜索数据
 func (s *DouyinSource) Fetch(ctx context.Context) ([]byte, error) {
-	// 首先获取cookie
-	cookieURL := "https://www.douyin.com/passport/general/login_guiding_strategy/?aid=6383"
-	client := &http.Client{}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, cookieURL, nil)
+	// 创建HTTP客户端
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// 创建请求
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.URL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	// 发送请求获取cookie
+	// 设置查询参数
+	q := req.URL.Query()
+	q.Add("device_platform", "webapp")
+	q.Add("aid", "6383")
+	q.Add("channel", "channel_pc_web")
+	req.URL.RawQuery = q.Encode()
+
+	// 设置请求头
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "application/json, text/plain, */*")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9")
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Pragma", "no-cache")
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Origin", "https://www.douyin.com")
+	req.Header.Set("Referer", "https://www.douyin.com/")
+
+	// 发送请求
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 
-	// 收集cookie
-	var cookies []string
-	for _, cookie := range resp.Cookies() {
-		cookies = append(cookies, cookie.Name+"="+cookie.Value)
-	}
-
-	// 现在使用收集到的cookie请求热点数据
-	hotReq, err := http.NewRequestWithContext(ctx, http.MethodGet, s.URL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// 设置cookie头
-	if len(cookies) > 0 {
-		cookieStr := cookies[0]
-		for i := 1; i < len(cookies); i++ {
-			cookieStr += "; " + cookies[i]
-		}
-		hotReq.Header.Set("Cookie", cookieStr)
-	}
-
-	// 发送请求获取热点数据
-	hotResp, err := client.Do(hotReq)
-	if err != nil {
-		return nil, err
-	}
-	defer hotResp.Body.Close()
-
-	return readResponseBody(hotResp)
+	return io.ReadAll(resp.Body)
 }
 
 // Parse 解析抖音热门搜索内容
 func (s *DouyinSource) Parse(content []byte) ([]models.Item, error) {
 	var resp DouyinResponse
 	if err := json.Unmarshal(content, &resp); err != nil {
-		return nil, err
+		// 如果JSON解析失败，返回空数组而非错误，避免程序崩溃
+		return []models.Item{}, nil
 	}
 
-	items := make([]models.Item, len(resp.Data.WordList))
-	for i, word := range resp.Data.WordList {
-		items[i] = models.Item{
+	items := make([]models.Item, 0, len(resp.Data.WordList))
+	for _, word := range resp.Data.WordList {
+		if word.SentenceID == "" || word.Word == "" {
+			continue
+		}
+		items = append(items, models.Item{
 			ID:          word.SentenceID,
 			Title:       word.Word,
 			URL:         "https://www.douyin.com/hot/" + word.SentenceID,
 			Source:      s.Name,
 			CreatedAt:   time.Now(),
 			PublishedAt: time.Now(),
-		}
+		})
 	}
 
 	return items, nil

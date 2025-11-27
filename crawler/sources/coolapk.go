@@ -131,10 +131,6 @@ func (s *CoolapkSource) Parse(content []byte) ([]models.Item, error) {
 		return nil, err
 	}
 
-	if len(resp.Data) == 0 {
-		return nil, fmt.Errorf("failed to fetch data")
-	}
-
 	var items []models.Item
 
 	for _, item := range resp.Data {

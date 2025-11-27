@@ -26,17 +26,15 @@ func NewJuejinSource() *JuejinSource {
 
 // JuejinResult 掘金API响应结构
 type JuejinResult struct {
-	Data struct {
-		List []struct {
-			Content struct {
-				ContentID    string `json:"content_id"`
-				Title        string `json:"title"`
-				BriefContent string `json:"brief_content"`
-				Category     struct {
-					Name string `json:"name"`
-				} `json:"category"`
-			} `json:"content"`
-		} `json:"list"`
+	Data []struct {
+		Content struct {
+			ContentID    string `json:"content_id"`
+			Title        string `json:"title"`
+			BriefContent string `json:"brief_content"`
+			Category     struct {
+				Name string `json:"name"`
+			} `json:"category"`
+		} `json:"content"`
 	} `json:"data"`
 }
 
@@ -47,9 +45,9 @@ func (s *JuejinSource) Parse(content []byte) ([]models.Item, error) {
 		return nil, err
 	}
 
-	items := make([]models.Item, 0, len(result.Data.List))
+	items := make([]models.Item, 0, len(result.Data))
 	now := time.Now()
-	for _, item := range result.Data.List {
+	for _, item := range result.Data {
 		items = append(items, models.Item{
 			ID:          item.Content.ContentID,
 			Title:       item.Content.Title,

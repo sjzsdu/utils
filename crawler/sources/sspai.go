@@ -48,8 +48,16 @@ func (s *SSPaiSource) Fetch(ctx context.Context) ([]byte, error) {
 	// 设置User-Agent
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
 
+	// 获取客户端，如果为nil则创建默认客户端
+	client := s.Client
+	if client == nil {
+		client = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+
 	// 发送请求
-	resp, err := s.Client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

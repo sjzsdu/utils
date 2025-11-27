@@ -41,37 +41,32 @@ func NewKaopuSource() *KaopuSource {
 
 // Parse 解析叩谱新闻内容
 func (s *KaopuSource) Parse(content []byte) ([]models.Item, error) {
-	var result KaopuResponse
+	// 直接将响应解析为数组类型
+	var result []KaopuItem
 	if err := json.Unmarshal(content, &result); err != nil {
 		return nil, err
 	}
 
 	var news []models.Item
 	// 过滤掉特定出版商的内容
-	filteredItems := result.Data[:0]
-	for _, item := range result.Data {
+	for _, item := range result {
 		// 排除"财新"和"公视"
 		if item.Publisher != "财新" && item.Publisher != "公视" {
-			filteredItems = append(filteredItems, item)
-		}
-	}
+			// 解析发布日期
+			pubDate, err := time.Parse(time.RFC3339, item.PubDate)
+			if err != nil {
+				pubDate = time.Now()
+			}
 
-	// 转换为标准Item格式
-	for _, item := range filteredItems {
-		// 解析发布日期
-		pubDate, err := time.Parse(time.RFC3339, item.PubDate)
-		if err != nil {
-			pubDate = time.Now()
+			news = append(news, models.Item{
+				ID:          fmt.Sprintf("%s", item.Link),
+				Title:       item.Title,
+				URL:         fmt.Sprintf("https://www.kaopu001.com%s", item.Link),
+				Source:      s.Name,
+				CreatedAt:   time.Now(),
+				PublishedAt: pubDate,
+			})
 		}
-
-		news = append(news, models.Item{
-			ID:          fmt.Sprintf("%s", item.Link),
-			Title:       item.Title,
-			URL:         fmt.Sprintf("https://www.kaopu001.com%s", item.Link),
-			Source:      s.Name,
-			CreatedAt:   time.Now(),
-			PublishedAt: pubDate,
-		})
 	}
 
 	return news, nil

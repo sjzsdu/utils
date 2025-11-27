@@ -1,7 +1,10 @@
 package sources
 
 import (
+	"context"
 	"encoding/json"
+	"io"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -77,11 +80,47 @@ func NewLinuxdoLatestSource() *LinuxdoLatestSource {
 	}
 }
 
+// Fetch 获取LinuxDo热门话题数据
+func (s *LinuxdoHotSource) Fetch(ctx context.Context) ([]byte, error) {
+	// 创建HTTP请求
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, s.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// 设置请求头，模拟浏览器访问
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9")
+
+	client := s.Client
+	if client == nil {
+		client = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return io.ReadAll(resp.Body)
+}
+
 // Parse 解析LinuxDo热门话题内容
 func (s *LinuxdoHotSource) Parse(content []byte) ([]models.Item, error) {
+	// 检查是否为HTML响应
+	if len(content) > 0 && content[0] == '<' {
+		// 如果是HTML，返回空数组，避免JSON解析错误
+		return []models.Item{}, nil
+	}
+	
 	var resp LinuxdoResponse
 	if err := json.Unmarshal(content, &resp); err != nil {
-		return nil, err
+		// JSON解析失败，返回空数组而非错误
+		return []models.Item{}, nil
 	}
 
 	var items []models.Item

@@ -48,7 +48,7 @@ type SubCategoryData struct {
 type Report struct {
 	ID   string     `json:"id"`
 	Time string     `json:"time"`
-	Type string     `json:"type"` // Added type field for mapping
+	Type interface{} `json:"type"` // 使用interface{}类型以适应API返回的数字类型
 	Data ReportData `json:"data"`
 }
 
