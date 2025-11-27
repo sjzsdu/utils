@@ -9,9 +9,6 @@ import (
 	"github.com/sjzsdu/utils/crawler/pkg/crawler"
 	"github.com/sjzsdu/utils/crawler/pkg/models"
 	"github.com/sjzsdu/utils/crawler/sources"
-
-	_ "github.com/sjzsdu/utils/crawler/sources/github"
-	_ "github.com/sjzsdu/utils/crawler/sources/news"
 )
 
 func main() {
