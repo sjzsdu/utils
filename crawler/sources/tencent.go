@@ -66,9 +66,10 @@ type TencentResponse struct {
 func NewTencentSource() *TencentSource {
 	return &TencentSource{
 		BaseSource: BaseSource{
-			Name:     "tencent-hot",
-			URL:      "https://i.news.qq.com/web_backend/v2/getTagInfo?tagId=aEWqxLtdgmQ%3D",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "tencent-hot",
+			URL:        "https://i.news.qq.com/web_backend/v2/getTagInfo?tagId=aEWqxLtdgmQ%3D",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政", "科技"},
 		},
 	}
 }

@@ -12,10 +12,11 @@ import (
 
 // BaseSource 是所有数据源的基础实现
 type BaseSource struct {
-	Name     string
-	URL      string
-	Interval int
-	Client   *http.Client
+	Name       string
+	URL        string
+	Interval   int
+	Client     *http.Client
+	Categories []string
 }
 
 // GetName 返回数据源名称
@@ -67,4 +68,9 @@ func (s *BaseSource) Fetch(ctx context.Context) ([]byte, error) {
 // 基础实现返回空数组，具体数据源需要重写此方法
 func (s *BaseSource) Parse(content []byte) ([]models.Item, error) {
 	return []models.Item{}, nil
+}
+
+// GetCategories 返回数据源的分类列表
+func (s *BaseSource) GetCategories() []string {
+	return s.Categories
 }

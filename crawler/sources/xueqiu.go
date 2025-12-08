@@ -37,9 +37,10 @@ type XueqiuResponse struct {
 func NewXueqiuSource() *XueqiuSource {
 	return &XueqiuSource{
 		BaseSource: BaseSource{
-			Name:     "xueqiu",
-			URL:      "https://stock.xueqiu.com/v5/stock/hot_stock/list.json?size=30&_type=10&type=10",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "xueqiu",
+			URL:        "https://xueqiu.com/statuses/hot/listV2.json?since_id=-1&max_id=-1&size=15",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经"},
 		},
 	}
 }

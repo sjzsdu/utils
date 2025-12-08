@@ -18,9 +18,10 @@ type SteamSource struct {
 func NewSteamSource() *SteamSource {
 	return &SteamSource{
 		BaseSource: BaseSource{
-			Name:     "steam",
-			URL:      "https://store.steampowered.com/stats/stats/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "steam",
+			URL:        "https://store.steampowered.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"游戏", "科技"},
 		},
 	}
 }

@@ -72,9 +72,10 @@ func getClsSearchParams() url.Values {
 func NewClsTelegraphSource() *ClsSource {
 	return &ClsSource{
 		BaseSource: BaseSource{
-			Name:     "cls-telegraph",
-			URL:      "https://www.cls.cn/nodeapi/updateTelegraphList",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "cls-telegraph",
+			URL:        "https://www.cls.cn/nodeapi/updateTelegraphList",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }
@@ -83,9 +84,10 @@ func NewClsTelegraphSource() *ClsSource {
 func NewClsDepthSource() *ClsSource {
 	return &ClsSource{
 		BaseSource: BaseSource{
-			Name:     "cls-depth",
-			URL:      "https://www.cls.cn/v3/depth/home/assembled/1000",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "cls-depth",
+			URL:        "https://www.cls.cn/v3/depth/home/assembled/1000",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }
@@ -94,9 +96,10 @@ func NewClsDepthSource() *ClsSource {
 func NewClsHotSource() *ClsSource {
 	return &ClsSource{
 		BaseSource: BaseSource{
-			Name:     "cls-hot",
-			URL:      "https://www.cls.cn/v2/article/hot/list",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "cls-hot",
+			URL:        "https://www.cls.cn/v2/article/hot/list",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }

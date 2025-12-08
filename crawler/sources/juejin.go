@@ -17,9 +17,10 @@ type JuejinSource struct {
 func NewJuejinSource() *JuejinSource {
 	return &JuejinSource{
 		BaseSource: BaseSource{
-			Name:     "juejin",
-			URL:      "https://api.juejin.cn/content_api/v1/content/article_rank?category_id=1&type=hot&spider=0",
-			Interval: 3600, // 1小时爬取一次
+			Name:       "juejin",
+			URL:        "https://api.juejin.cn/content_api/v1/content/article_rank?category_id=1&type=hot&spider=0",
+			Interval:   3600, // 1小时爬取一次
+			Categories: []string{"科技", "编程"},
 		},
 	}
 }

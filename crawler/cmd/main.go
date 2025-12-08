@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +16,12 @@ import (
 )
 
 func main() {
+	// 解析命令行参数
+	var categoriesStr, sourcesStr string
+	flag.StringVar(&categoriesStr, "categories", "", "指定要爬取的类别列表，多个类别用逗号分隔")
+	flag.StringVar(&sourcesStr, "sources", "", "指定要爬取的数据源名称列表，多个名称用逗号分隔")
+	flag.Parse()
+
 	// 创建日志文件
 	logFile, err := os.OpenFile("crawler_results.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
@@ -33,10 +40,39 @@ func main() {
 
 	// 获取数据源注册表
 	registry := sources.GetRegistry()
-	allSources := registry.List()
+	var selectedSources []crawler.Source
+
+	// 根据命令行参数获取要爬取的数据源
+	if sourcesStr != "" {
+		// 根据数据源名称获取
+		sourceNames := strings.Split(sourcesStr, ",")
+		for i := range sourceNames {
+			sourceNames[i] = strings.TrimSpace(sourceNames[i])
+		}
+		var err error
+		selectedSources, err = registry.GetSources(sourceNames)
+		if err != nil {
+			fmt.Printf("Failed to get sources: %v\n", err)
+			return
+		}
+	} else if categoriesStr != "" {
+		// 根据类别获取
+		categories := strings.Split(categoriesStr, ",")
+		for i := range categories {
+			categories[i] = strings.TrimSpace(categories[i])
+		}
+		selectedSources = registry.GetByCategories(categories)
+		if len(selectedSources) == 0 {
+			fmt.Printf("No sources found for categories: %s\n", categoriesStr)
+			return
+		}
+	} else {
+		// 爬取所有数据源
+		selectedSources = registry.List()
+	}
 
 	// 注册所有数据源
-	for _, source := range allSources {
+	for _, source := range selectedSources {
 		if err := engine.RegisterSource(source); err != nil {
 			fmt.Printf("Failed to register source %s: %v\n", source.GetName(), err)
 			return
@@ -56,7 +92,7 @@ func main() {
 
 	// 为每个数据源创建订阅通道
 	sourceChannels := make(map[string]chan []models.Item)
-	for _, source := range allSources {
+	for _, source := range selectedSources {
 		sourceName := source.GetName()
 		sourceChannels[sourceName] = make(chan []models.Item, 10)
 		if err := engine.Subscribe(sourceName, sourceChannels[sourceName]); err != nil {
@@ -73,7 +109,7 @@ func main() {
 
 	// 用于跟踪已处理的数据源数量
 	processedSources := make(map[string]bool)
-	totalSources := len(allSources)
+	totalSources := len(selectedSources)
 
 	// 用于统计每个数据源获取的数据量
 	resultsStats := make(map[string]int)
@@ -85,7 +121,7 @@ func main() {
 	}, 100)
 
 	// 为每个数据源启动一个goroutine处理结果
-	for _, source := range allSources {
+	for _, source := range selectedSources {
 		sourceName := source.GetName()
 		go func(name string, ch chan []models.Item) {
 			// 设置10秒超时，避免无限期等待
@@ -122,7 +158,7 @@ func main() {
 			if len(processedSources) >= totalSources {
 				fmt.Println("All sources processed, exiting...")
 				logger.Println("All sources processed, exiting...")
-				goto ExitLoop 
+				goto ExitLoop
 			}
 
 		// 超时退出
@@ -144,8 +180,8 @@ ExitLoop:
 	logger.Println(separator)
 
 	// 按照数据源名称排序
-	sourceNames := make([]string, 0, len(allSources))
-	for _, source := range allSources {
+	sourceNames := make([]string, 0, len(selectedSources))
+	for _, source := range selectedSources {
 		sourceNames = append(sourceNames, source.GetName())
 	}
 

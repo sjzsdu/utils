@@ -39,9 +39,10 @@ type CankaoxiaoxiResponse struct {
 func NewCankaoxiaoxiSource() *CankaoxiaoxiSource {
 	return &CankaoxiaoxiSource{
 		BaseSource: BaseSource{
-			Name:     "cankaoxiaoxi",
-			URL:      "https://china.cankaoxiaoxi.com/json/channel/zhongguo/list.json",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "cankaoxiaoxi",
+			URL:        "https://china.cankaoxiaoxi.com/json/channel/zhongguo/list.json",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政"},
 		},
 		channels: []string{"zhongguo", "guandian", "gj"},
 	}

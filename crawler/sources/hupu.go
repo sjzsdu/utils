@@ -19,9 +19,10 @@ type HupuSource struct {
 func NewHupuSource() *HupuSource {
 	return &HupuSource{
 		BaseSource: BaseSource{
-			Name:     "hupu",
-			URL:      "https://bbs.hupu.com/topic-daily-hot",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "hupu",
+			URL:        "https://www.hupu.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"体育", "综合"},
 		},
 	}
 }

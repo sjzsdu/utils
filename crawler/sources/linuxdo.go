@@ -62,9 +62,10 @@ type LinuxdoLatestSource struct {
 func NewLinuxdoHotSource() *LinuxdoHotSource {
 	return &LinuxdoHotSource{
 		BaseSource: BaseSource{
-			Name:     "linuxdo-hot",
-			URL:      "https://linux.do/top/daily.json",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "linuxdo-hot",
+			URL:        "https://linux.do/top/daily.json",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技"},
 		},
 	}
 }
@@ -73,9 +74,10 @@ func NewLinuxdoHotSource() *LinuxdoHotSource {
 func NewLinuxdoLatestSource() *LinuxdoLatestSource {
 	return &LinuxdoLatestSource{
 		BaseSource: BaseSource{
-			Name:     "linuxdo-latest",
-			URL:      "https://linux.do/latest.json?order=created",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "linuxdo-latest",
+			URL:        "https://linux.do/latest.json?order=created",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技"},
 		},
 	}
 }

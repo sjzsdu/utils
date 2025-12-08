@@ -21,9 +21,10 @@ type SmzdmSource struct {
 func NewSmzdmSource() *SmzdmSource {
 	return &SmzdmSource{
 		BaseSource: BaseSource{
-			Name:     "smzdm",
-			URL:      "https://post.smzdm.com/hot_1/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "smzdm",
+			URL:        "https://post.smzdm.com/hot_1/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"购物", "科技"},
 		},
 	}
 }

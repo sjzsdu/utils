@@ -18,9 +18,10 @@ type IfengSource struct {
 func NewIfengSource() *IfengSource {
 	return &IfengSource{
 		BaseSource: BaseSource{
-			Name:     "ifeng",
-			URL:      "https://www.ifeng.com/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "ifeng",
+			URL:        "https://www.ifeng.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政"},
 		},
 	}
 }

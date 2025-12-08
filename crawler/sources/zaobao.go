@@ -21,9 +21,10 @@ type ZaobaoSource struct {
 func NewZaobaoSource() *ZaobaoSource {
 	return &ZaobaoSource{
 		BaseSource: BaseSource{
-			Name:     "zaobao",
-			URL:      "https://www.zaochenbao.com/realtime/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "zaobao",
+			URL:        "https://www.zaobao.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政"},
 		},
 	}
 }

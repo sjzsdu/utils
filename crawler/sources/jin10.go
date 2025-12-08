@@ -43,9 +43,10 @@ type Jin10Item struct {
 func NewJin10Source() *Jin10Source {
 	return &Jin10Source{
 		BaseSource: BaseSource{
-			Name:     "jin10",
-			URL:      "https://www.jin10.com/flash_newest.js",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "jin10",
+			URL:        "https://www.jin10.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }

@@ -19,9 +19,10 @@ type KuaishouSource struct {
 func NewKuaishouSource() *KuaishouSource {
 	return &KuaishouSource{
 		BaseSource: BaseSource{
-			Name:     "kuaishou",
-			URL:      "https://www.kuaishou.com/?isHome=1",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "kuaishou",
+			URL:        "https://www.kuaishou.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"娱乐", "综合"},
 		},
 	}
 }

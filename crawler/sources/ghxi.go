@@ -21,9 +21,10 @@ type GHXISource struct {
 func NewGHXISource() crawler.Source {
 	return &GHXISource{
 		BaseSource: BaseSource{
-			Name:     "ghxi",
-			URL:      "https://www.ghxi.com/category/all",
-			Interval: 300, // Interval in seconds
+			Name:       "ghxi",
+			URL:        "https://www.ghxi.com/category/all",
+			Interval:   300, // Interval in seconds
+			Categories: []string{"综合", "时政"},
 		},
 	}
 }

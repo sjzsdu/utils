@@ -22,4 +22,7 @@ type Source interface {
 
 	// GetInterval 返回爬取间隔（秒）
 	GetInterval() int
+
+	// GetCategories 返回数据源的分类列表
+	GetCategories() []string
 }

@@ -29,9 +29,10 @@ type SSPaiResult struct {
 func NewSSPaiSource() *SSPaiSource {
 	return &SSPaiSource{
 		BaseSource: BaseSource{
-			Name:     "sspai",
-			URL:      "https://sspai.com/api/v1/article/tag/page/get?limit=30&offset=0&created_at={{timestamp}}&tag=%E7%83%AD%E9%97%A8%E6%96%87%E7%AB%A0&released=false",
-			Interval: 3600, // 1小时爬取一次
+			Name:       "sspai",
+			URL:        "https://sspai.com/api/v1/article/tag/page/get?limit=30&offset=0&created_at={{timestamp}}&tag=%E7%83%AD%E9%97%A8%E6%96%87%E7%AB%A0&released=false",
+			Interval:   3600, // 1小时爬取一次
+			Categories: []string{"科技", "应用"},
 		},
 	}
 }

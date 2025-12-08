@@ -9,13 +9,14 @@ type WeiboSource struct {
 	BaseSource
 }
 
-// NewWeiboSource 创建微博数据源实例
+// NewWeiboSource 创建微博热搜数据源实例
 func NewWeiboSource() *WeiboSource {
 	return &WeiboSource{
 		BaseSource: BaseSource{
-			Name:     "weibo",
-			URL:      "https://s.weibo.com/top/summary?cate=realtimehot",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "weibo",
+			URL:        "https://weibo.com/ajax/statuses/hot_band",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政", "娱乐"},
 		},
 	}
 }

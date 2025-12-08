@@ -21,9 +21,10 @@ type MktNewsSource struct {
 func NewMktNewsSource() crawler.Source {
 	return &MktNewsSource{
 		BaseSource: BaseSource{
-			Name:     "mktnews",
-			URL:      "https://api.mktnews.net/api/flash/host",
-			Interval: 300, // Interval in seconds
+			Name:       "mktnews",
+			URL:        "https://api.mktnews.net/api/flash/host",
+			Interval:   300, // Interval in seconds
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }

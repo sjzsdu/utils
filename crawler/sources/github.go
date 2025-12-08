@@ -13,9 +13,10 @@ type GitHubSource struct {
 func NewGitHubSource() *GitHubSource {
 	return &GitHubSource{
 		BaseSource: BaseSource{
-			Name:     "github",
-			URL:      "https://github.com/trending",
-			Interval: 3600, // 1小时爬取一次
+			Name:       "github",
+			URL:        "https://github.com/trending",
+			Interval:   3600, // 1小时爬取一次
+			Categories: []string{"科技", "编程"},
 		},
 	}
 }

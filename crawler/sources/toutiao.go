@@ -40,9 +40,10 @@ type ToutiaoResponse struct {
 func NewToutiaoSource() *ToutiaoSource {
 	return &ToutiaoSource{
 		BaseSource: BaseSource{
-			Name:     "toutiao",
-			URL:      "https://www.toutiao.com/hot-event/hot-board/?origin=toutiao_pc",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "toutiao",
+			URL:        "https://www.toutiao.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政", "娱乐"},
 		},
 	}
 }

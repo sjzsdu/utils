@@ -26,9 +26,10 @@ type V2EXResult struct {
 func NewV2EXSource() *V2EXSource {
 	return &V2EXSource{
 		BaseSource: BaseSource{
-			Name:     "v2ex",
-			URL:      "https://www.v2ex.com/api/topics/hot.json",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "v2ex",
+			URL:        "https://www.v2ex.com/api/topics/hot.json",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "编程"},
 		},
 	}
 }

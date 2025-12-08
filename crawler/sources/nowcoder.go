@@ -34,9 +34,10 @@ type NowcoderResponse struct {
 func NewNowcoderSource() *NowcoderSource {
 	return &NowcoderSource{
 		BaseSource: BaseSource{
-			Name:     "nowcoder",
-			URL:      "https://gw-c.nowcoder.com/api/sparta/hot-search/top-hot-pc",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "nowcoder",
+			URL:        "https://gw-c.nowcoder.com/api/sparta/hot-search/top-hot-pc",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "编程", "职场"},
 		},
 	}
 }

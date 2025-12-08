@@ -30,9 +30,10 @@ type TiebaResponse struct {
 func NewTiebaSource() *TiebaSource {
 	return &TiebaSource{
 		BaseSource: BaseSource{
-			Name:     "tieba",
-			URL:      "https://tieba.baidu.com/hottopic/browse/topicList",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "tieba",
+			URL:        "https://tieba.baidu.com/hottopic/browse/topicList",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "娱乐"},
 		},
 	}
 }

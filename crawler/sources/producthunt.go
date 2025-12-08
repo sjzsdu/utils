@@ -53,9 +53,10 @@ type ProducthuntResponse struct {
 func NewProducthuntSource() *ProducthuntSource {
 	return &ProducthuntSource{
 		BaseSource: BaseSource{
-			Name:     "producthunt",
-			URL:      "https://api.producthunt.com/v2/api/graphql",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "producthunt",
+			URL:        "https://api.producthunt.com/v2/api/graphql",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "产品"},
 		},
 	}
 }

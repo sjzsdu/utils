@@ -18,9 +18,10 @@ type ChongbuluoSource struct {
 func NewChongbuluoSource() *ChongbuluoSource {
 	return &ChongbuluoSource{
 		BaseSource: BaseSource{
-			Name:     "chongbuluo",
-			URL:      "https://www.chongbuluo.com/forum.php?mod=guide&view=hot",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "chongbuluo",
+			URL:        "https://www.chongbuluo.com/forum.php?mod=guide&view=hot",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "综合"},
 		},
 	}
 }

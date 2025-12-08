@@ -17,9 +17,10 @@ type ITHomeSource struct {
 func NewITHomeSource() *ITHomeSource {
 	return &ITHomeSource{
 		BaseSource: BaseSource{
-			Name:     "ithome",
-			URL:      "https://www.ithome.com/list/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "ithome",
+			URL:        "https://www.ithome.com/rss/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技"},
 		},
 	}
 }

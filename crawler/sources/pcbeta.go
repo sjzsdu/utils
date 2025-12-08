@@ -42,9 +42,10 @@ type RSSChannel struct {
 func NewPcbetaSource() *PcbetaSource {
 	return &PcbetaSource{
 		BaseSource: BaseSource{
-			Name:     "pcbeta",
-			URL:      "https://bbs.pcbeta.com/forum.php?mod=rss&fid=563&auth=0",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "pcbeta",
+			URL:        "https://bbs.pcbeta.com/forum.php?mod=rss&fid=563&auth=0",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "电脑"},
 		},
 	}
 }

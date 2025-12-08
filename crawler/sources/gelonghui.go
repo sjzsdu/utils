@@ -18,9 +18,10 @@ type GelonghuiSource struct {
 func NewGelonghuiSource() *GelonghuiSource {
 	return &GelonghuiSource{
 		BaseSource: BaseSource{
-			Name:     "gelonghui",
-			URL:      "https://www.gelonghui.com/news/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "gelonghui",
+			URL:        "https://www.gelonghui.com/news/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经"},
 		},
 	}
 }

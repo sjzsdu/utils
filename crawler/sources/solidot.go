@@ -20,9 +20,10 @@ type SolidotSource struct {
 func NewSolidotSource() *SolidotSource {
 	return &SolidotSource{
 		BaseSource: BaseSource{
-			Name:     "solidot",
-			URL:      "https://www.solidot.org",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "solidot",
+			URL:        "https://www.solidot.org/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技"},
 		},
 	}
 }

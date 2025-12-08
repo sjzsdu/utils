@@ -90,9 +90,10 @@ func genHeaders() http.Header {
 func NewCoolapkSource() *CoolapkSource {
 	return &CoolapkSource{
 		BaseSource: BaseSource{
-			Name:     "coolapk",
-			URL:      "https://api.coolapk.com/v6/page/dataList?url=%2Ffeed%2FstatList%3FcacheExpires%3D300%26statType%3Dday%26sortField%3Ddetailnum%26title%3D%E4%BB%8A%E6%97%A5%E7%83%AD%E9%97%A8&title=%E4%BB%8A%E6%97%A5%E7%83%AD%E9%97%A8&subTitle=&page=1",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "coolapk",
+			URL:        "https://api.coolapk.com/v6/page/dataList?url=%2Ffeed%2FstatList%3FcacheExpires%3D300%26statType%3Dday%26sortField%3Ddetailnum%26title%3D%E4%BB%8A%E6%97%A5%E7%83%AD%E9%97%A8&title=%E4%BB%8A%E6%97%A5%E7%83%AD%E9%97%A8&subTitle=&page=1",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "应用"},
 		},
 	}
 }

@@ -17,9 +17,10 @@ type BaiduSource struct {
 func NewBaiduSource() *BaiduSource {
 	return &BaiduSource{
 		BaseSource: BaseSource{
-			Name:     "baidu",
-			URL:      "https://top.baidu.com/board?tab=realtime",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "baidu",
+			URL:        "https://www.baidu.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "搜索"},
 		},
 	}
 }

@@ -24,9 +24,10 @@ type FastbullNewsSource struct {
 func NewFastbullExpressSource() *FastbullExpressSource {
 	return &FastbullExpressSource{
 		BaseSource: BaseSource{
-			Name:     "fastbull-express",
-			URL:      "https://www.fastbull.com/cn/express-news",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "fastbull-express",
+			URL:        "https://www.fastbull.com/cn/express-news",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }
@@ -35,9 +36,10 @@ func NewFastbullExpressSource() *FastbullExpressSource {
 func NewFastbullNewsSource() *FastbullNewsSource {
 	return &FastbullNewsSource{
 		BaseSource: BaseSource{
-			Name:     "fastbull-news",
-			URL:      "https://www.fastbull.com/cn/news",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "fastbull-news",
+			URL:        "https://www.fastbull.com/cn/news",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"财经", "科技"},
 		},
 	}
 }

@@ -24,13 +24,14 @@ type HackerNewsRSS struct {
 	} `xml:"channel"`
 }
 
-// NewHackerNewsSource 创建HackerNews数据源实例
+// NewHackerNewsSource 创建Hacker News数据源实例
 func NewHackerNewsSource() *HackerNewsSource {
 	return &HackerNewsSource{
 		BaseSource: BaseSource{
-			Name:     "hackernews",
-			URL:      "https://news.ycombinator.com/rss",
-			Interval: 3600, // 1小时爬取一次
+			Name:       "hackernews",
+			URL:        "https://news.ycombinator.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技", "编程"},
 		},
 	}
 }

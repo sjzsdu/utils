@@ -35,9 +35,10 @@ type DouyinResponse struct {
 func NewDouyinSource() *DouyinSource {
 	return &DouyinSource{
 		BaseSource: BaseSource{
-			Name:     "douyin",
-			URL:      "https://www.douyin.com/aweme/v1/web/hot/search/list/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "douyin",
+			URL:        "https://www.douyin.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"娱乐", "综合"},
 		},
 	}
 }

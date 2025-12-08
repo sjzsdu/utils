@@ -51,9 +51,10 @@ type DoubanResult struct {
 func NewDoubanSource() *DoubanSource {
 	return &DoubanSource{
 		BaseSource: BaseSource{
-			Name:     "douban",
-			URL:      "https://m.douban.com/rexxar/api/v2/subject/recent_hot/movie",
-			Interval: 3600, // 1小时爬取一次
+			Name:       "douban",
+			URL:        "https://m.douban.com/rexxar/api/v2/subject/recent_hot/movie",
+			Interval:   3600, // 1小时爬取一次
+			Categories: []string{"娱乐", "电影"},
 		},
 	}
 }

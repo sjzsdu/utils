@@ -11,13 +11,14 @@ type BilibiliSource struct {
 	BaseSource
 }
 
-// NewBilibiliSource 创建Bilibili数据源实例
+// NewBilibiliSource 创建B站数据源实例
 func NewBilibiliSource() *BilibiliSource {
 	return &BilibiliSource{
 		BaseSource: BaseSource{
-			Name:     "bilibili",
-			URL:      "https://s.search.bilibili.com/main/hotword?limit=30",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "bilibili",
+			URL:        "https://www.bilibili.com/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "娱乐"},
 		},
 	}
 }

@@ -38,6 +38,10 @@ func (m *mockSource) GetInterval() int {
 	return m.interval
 }
 
+func (m *mockSource) GetCategories() []string {
+	return []string{"test"}
+}
+
 func TestEngine(t *testing.T) {
 	// 创建内存缓存
 	memCache := cache.NewMemoryCache(1 * time.Hour)

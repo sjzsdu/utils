@@ -81,9 +81,10 @@ type ZhihuResponse struct {
 func NewZhihuSource() *ZhihuSource {
 	return &ZhihuSource{
 		BaseSource: BaseSource{
-			Name:     "zhihu",
-			URL:      "https://www.zhihu.com/api/v3/feed/topstory/hot-list-web?limit=20&desktop=true",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "zhihu",
+			URL:        "https://www.zhihu.com/api/v3/feed/topstory/hot-list-web?limit=20&desktop=true",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政"},
 		},
 	}
 }

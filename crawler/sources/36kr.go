@@ -26,9 +26,10 @@ type Kr36News struct {
 func New36KrSource() *Kr36Source {
 	return &Kr36Source{
 		BaseSource: BaseSource{
-			Name:     "36kr",
-			URL:      "https://36kr.com/api/newsflash/list",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "36kr",
+			URL:        "https://36kr.com/api/newsflash/list",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"科技"},
 		},
 	}
 }

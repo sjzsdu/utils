@@ -19,9 +19,10 @@ type SputniknewsCNSource struct {
 func NewSputniknewsCNSource() *SputniknewsCNSource {
 	return &SputniknewsCNSource{
 		BaseSource: BaseSource{
-			Name:     "sputniknewscn",
-			URL:      "https://sputniknews.cn/services/widget/lenta/",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "sputniknewscn",
+			URL:        "https://sputniknews.cn/services/widget/lenta/",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "时政"},
 		},
 	}
 }

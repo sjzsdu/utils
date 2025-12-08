@@ -32,9 +32,10 @@ type KaopuSource struct {
 func NewKaopuSource() *KaopuSource {
 	return &KaopuSource{
 		BaseSource: BaseSource{
-			Name:     "kaopu",
-			URL:      "https://kaopustorage.blob.core.windows.net/news-prod/news_list_hans_0.json",
-			Interval: 300, // 5分钟爬取一次
+			Name:       "kaopu",
+			URL:        "https://kaopustorage.blob.core.windows.net/news-prod/news_list_hans_0.json",
+			Interval:   300, // 5分钟爬取一次
+			Categories: []string{"综合", "新闻"},
 		},
 	}
 }
