@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.FilePath}}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.2/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@11.7.0/dist/mermaid.min.js"></script>
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .markdown-body pre {
+            background-color: #f6f8fa;
+            border-radius: 6px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+        .markdown-body code {
+            background-color: rgba(175,184,193,0.2);
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-size: 85%;
+        }
+        .markdown-body pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .mermaid-container {
+            background: white;
+            border-radius: 8px;
+            margin: 16px auto;
+            border: 1px solid #e5e7eb;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+        .mermaid {
+            width: 100%;
+            min-height: 50vh;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        /* 甘特图特殊处理：需要更大的宽度 */
+        .mermaid.gantt-chart {
+            min-width: 1200px;
+        }
+        .mermaid.gantt-chart svg {
+            min-width: 1200px;
+        }
+        /* 重置按钮 */
+        .chart-reset-btn {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 10;
+            opacity: 0.9;
+        }
+        .chart-reset-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            opacity: 1;
+        }
+        .chart-reset-btn:active {
+            transform: scale(0.95);
+        }
+        .chart-reset-btn svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+        .chart-reset-btn:hover svg {
+            transform: rotate(180deg);
+        }
+        
+        /* 固定 Header */
+        .fixed-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 三栏布局容器 */
+        .layout-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 80px; /* header 高度 */
+        }
+        
+        /* 左侧文档列表 */
+        .files-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        /* 中间内容区 */
+        .content-main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f9fafb;
+        }
+        
+        /* 右侧目录 */
+        .toc-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            background: white;
+            border-left: 1px solid #e5e7eb;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .toc-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .toc-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .toc-item {
+            margin: 4px 0;
+        }
+        .toc-item.level-2 {
+            padding-left: 16px;
+        }
+        .toc-link {
+            display: block;
+            padding: 6px 12px;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        .toc-link:hover {
+            background: #f3f4f6;
+            color: #3b82f6;
+            border-left-color: #3b82f6;
+        }
+        .toc-link.active {
+            background: #eff6ff;
+            color: #3b82f6;
+            font-weight: 500;
+            border-left-color: #3b82f6;
+        }
+        
+        .files-sidebar.hidden {
+            display: none;
+        }
+        
+        .toc-sidebar.hidden {
+            display: none;
+        }
+        
+        /* 侧边栏切换按钮 */
+        .sidebar-toggle {
+            position: fixed;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #4b5563;
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-toggle:hover {
+            background: #f9fafb;
+            color: #3b82f6;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .sidebar-toggle.left {
+            left: 1rem;
+            bottom: 2rem;
+        }
+        
+        .sidebar-toggle.right {
+            right: 1rem;
+            bottom: 2rem;
+        }
+        
+        .files-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #10b981;
+        }
+        
+        .files-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .file-item {
+            margin: 4px 0;
+        }
+        
+        .file-link {
+            display: block;
+            padding: 8px 12px;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .file-link:hover {
+            background: #f3f4f6;
+            color: #10b981;
+            border-left-color: #10b981;
+        }
+        
+        .file-link.active {
+            background: #d1fae5;
+            color: #10b981;
+            font-weight: 500;
+            border-left-color: #10b981;
+        }
+        /* 自定义滚动条 */
+        .toc-sidebar::-webkit-scrollbar,
+        .files-sidebar::-webkit-scrollbar,
+        .content-main::-webkit-scrollbar {
+            width: 8px;
+        }
+        .toc-sidebar::-webkit-scrollbar-track,
+        .files-sidebar::-webkit-scrollbar-track,
+        .content-main::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .toc-sidebar::-webkit-scrollbar-thumb,
+        .files-sidebar::-webkit-scrollbar-thumb,
+        .content-main::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .toc-sidebar::-webkit-scrollbar-thumb:hover,
+        .files-sidebar::-webkit-scrollbar-thumb:hover,
+        .content-main::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* 响应式设计 - 小屏幕默认隐藏侧边栏 */
+        @media (max-width: 1600px) {
+            .toc-sidebar:not(.show-mobile) {
+                position: fixed;
+                right: -300px;
+                width: 280px;
+                height: calc(100vh - 80px);
+                transition: right 0.3s ease;
+                box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+            }
+            .toc-sidebar.show-mobile {
+                right: 0;
+            }
+            .sidebar-toggle.right {
+                display: flex;
+            }
+        }
+        
+        @media (max-width: 1280px) {
+            .files-sidebar:not(.show-mobile) {
+                position: fixed;
+                left: -300px;
+                width: 280px;
+                height: calc(100vh - 80px);
+                transition: left 0.3s ease;
+                box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+            }
+            .files-sidebar.show-mobile {
+                left: 0;
+            }
+            .sidebar-toggle.left {
+                display: flex;
+            }
+        }
+        
+        @media (min-width: 1601px) {
+            .sidebar-toggle.right {
+                display: none;
+            }
+        }
+        
+        @media (min-width: 1281px) {
+            .sidebar-toggle.left {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .layout-container {
+                padding-top: 120px;
+            }
+        }
+        
+        /* Loading 状态 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .loading-progress {
+            margin-top: 10px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* 打印样式 */
+        @media print {
+            /* 隐藏非打印元素 - 包括图表交互和导航相关内容 */
+            /* 1. 隐藏所有导航元素 */
+            .fixed-header,
+            .sidebar-toggle,
+            .files-sidebar,
+            .toc-sidebar,
+            [id*="sidebar"],
+            [id*="toggle"],
+            /* 2. 隐藏所有图表交互元素 */
+            .chart-reset-btn,
+            /* 3. 隐藏使用提示 */
+            .bg-blue-50.border.border-blue-200.rounded-lg.p-4.mb-4.text-sm,
+            /* 4. 隐藏所有可能的按钮 */
+            [class*="btn"],
+            button,
+            /* 5. 隐藏所有可能的侧边栏和切换元素 */
+            [class*="sidebar"],
+            [class*="toggle"],
+            /* 6. 确保容器内只有图表本身可见 */
+            .mermaid-container > *:not(.mermaid),
+            /* 7. 隐藏加载相关元素 */
+            .loading-overlay,
+            .loading-spinner,
+            .loading-text,
+            .loading-progress {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                width: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* 调整页面布局 */
+            body {
+                background: white !important;
+                font-size: 12pt;
+            }
+            
+            .layout-container {
+                display: block !important;
+                height: auto !important;
+                padding-top: 0 !important;
+            }
+            
+            .content-main {
+                background: white !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            
+            /* 文档内容容器 */
+            .bg-white.rounded-xl.shadow-sm.border.border-gray-100.p-8.markdown-body {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* 调整打印边距 */
+            @page {
+                margin: 1cm;
+            }
+            
+            /* 图表打印优化 */
+            .mermaid-container {
+                border: 1px solid #e5e7eb !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin: 16px 0 !important;
+            }
+            
+            .mermaid {
+                min-height: 300px !important;
+                max-height: none !important;
+            }
+            
+            .mermaid svg {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            
+            /* 代码块打印优化 */
+            pre {
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                background-color: #f6f8fa !important;
+                border-radius: 6px !important;
+                padding: 16px !important;
+                border: 1px solid #e1e4e8 !important;
+            }
+            
+            /* 链接样式 */
+            a {
+                color: #0366d6 !important;
+                text-decoration: none !important;
+            }
+            
+            a::after {
+                content: " (" attr(href) ")";
+                font-size: 80%;
+                color: #6a737d !important;
+            }
+            
+            /* 使用提示打印优化 */
+            .bg-blue-50.border.border-blue-200.rounded-lg.p-4.mb-4.text-sm {
+                background-color: #f1f8ff !important;
+                border: 1px solid #d1ecf1 !important;
+                color: #0c5460 !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载文档...</div>
+        <div class="loading-progress" id="loading-progress">准备渲染</div>
+    </div>
+    
+    <!-- 固定 Header -->
+    <header class="fixed-header">
+        <div class="px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-gray-900">{{.FilePath}}</h1>
+                        <p class="text-xs text-gray-500">Markdown 文档浏览器</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/" 
+                       class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        返回列表
+                    </a>
+                    <button onclick="downloadMarkdown()" 
+                       class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        下载文档
+                    </button>
+                    <input type="hidden" id="markdownFilePath" value="{{.FilePath}}">
+                    <input type="hidden" id="markdownContentPath" value="{{if eq .FilePath "直接提供的内容"}}/raw-content{{else}}/raw{{.FilePath}}{{end}}">
+                    <button onclick="printDocument()" 
+                       class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium text-sm">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H7a2 2 0 00-2 2v4a2 2 0 002 2zm7-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        打印文档
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 侧边栏切换按钮 -->
+    <button class="sidebar-toggle left" id="files-toggle" title="切换文档列表">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span>文档</span>
+    </button>
+    
+    <button class="sidebar-toggle right" id="toc-toggle" title="切换目录">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <span>目录</span>
+    </button>
+    
+    <!-- 三栏布局 -->
+    <div class="layout-container">
+        <!-- 左侧：文档列表 -->
+        <aside class="files-sidebar" id="files-sidebar">
+            <div class="files-title">📂 文档列表</div>
+            <ul class="files-list">
+                {{range .MarkdownFiles}}
+                <li class="file-item">
+                    <a href="/view{{.RelativePath}}" 
+                       class="file-link {{if eq $.FilePath .RelativePath}}active{{end}}" 
+                       title="{{.RelativePath}}">
+                        {{.Name}}
+                    </a>
+                </li>
+                {{end}}
+            </ul>
+        </aside>
+        
+        <!-- 中间：文档内容 -->
+        <main class="content-main">
+            <!-- 使用提示 -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 text-sm">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <div class="mb-1">
+                            <strong class="text-blue-900">图表交互：</strong>
+                            <span class="text-blue-800">拖拽平移 · 滚轮缩放 · 双击放大 · 右下角重置</span>
+                        </div>
+                        <div>
+                            <strong class="text-blue-900">导航：</strong>
+                            <span class="text-blue-800">左侧切换文档 · 右侧章节目录 · 滚动自动高亮</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文档内容 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 markdown-body" id="content">
+                <!-- Markdown content will be rendered here -->
+            </div>
+        </main>
+        
+        <!-- 右侧：文档目录 -->
+        <aside class="toc-sidebar" id="toc-sidebar">
+            <div class="toc-title">📑 文档目录</div>
+            <ul class="toc-list" id="toc-list">
+                <!-- 动态生成的目录项 -->
+            </ul>
+        </aside>
+    </div>
+    
+    <!-- 原始内容 -->
+    <script type="text/plain" id="markdown-content">{{.Content}}</script>
+
+    <script>
+        // 存储所有图表的 pan-zoom 实例和初始状态
+        const chartInstances = new Map();
+        
+        // Loading 进度管理
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingProgress = document.getElementById('loading-progress');
+        
+        function updateLoadingProgress(message) {
+            if (loadingProgress) {
+                loadingProgress.textContent = message;
+            }
+            console.log('Loading:', message);
+        }
+        
+        function hideLoading() {
+            if (loadingOverlay) {
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+        
+        // 打印功能
+        function printDocument() {
+            console.log('准备打印文档...');
+            
+            // 临时调整页面布局
+            const originalBodyStyle = document.body.style.cssText;
+            const originalContentStyle = document.getElementById('content').style.cssText;
+            
+            // 隐藏不需要打印的元素
+            document.querySelectorAll('.fixed-header, .sidebar-toggle, .files-sidebar, .toc-sidebar, .chart-reset-btn').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // 调整内容容器样式
+            document.querySelector('.layout-container').style.display = 'block';
+            document.querySelector('.layout-container').style.height = 'auto';
+            document.querySelector('.layout-container').style.paddingTop = '0';
+            document.querySelector('.content-main').style.padding = '0';
+            
+            // 确保图表已渲染完成
+            setTimeout(() => {
+                console.log('执行打印...');
+                
+                // 使用浏览器的打印功能
+                window.print();
+                
+                // 恢复原始样式
+                setTimeout(() => {
+                    console.log('恢复页面布局...');
+                    
+                    // 恢复显示隐藏的元素
+                    document.querySelectorAll('.fixed-header, .sidebar-toggle, .files-sidebar, .toc-sidebar, .chart-reset-btn').forEach(el => {
+                        el.style.display = '';
+                    });
+                    
+                    // 恢复容器样式
+                    document.querySelector('.layout-container').style.display = '';
+                    document.querySelector('.layout-container').style.height = '';
+                    document.querySelector('.layout-container').style.paddingTop = '';
+                    document.querySelector('.content-main').style.padding = '';
+                    
+                    document.body.style.cssText = originalBodyStyle;
+                    document.getElementById('content').style.cssText = originalContentStyle;
+                    
+                    console.log('打印完成，页面已恢复');
+                }, 300);
+            }, 300);
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const markdownContent = document.getElementById('markdown-content').textContent;
+            const contentDiv = document.getElementById('content');
+            
+            updateLoadingProgress('开始渲染 Markdown...');
+            console.log('开始渲染 Markdown...');
+            
+            // 配置 marked.js
+            marked.setOptions({
+                gfm: true,
+                breaks: true,
+                highlight: function(code, lang) {
+                    // 对于 mermaid 代码块，保持原样不做语法高亮
+                    if (lang === 'mermaid') {
+                        return code;
+                    }
+                    return code;
+                }
+            });
+            
+            // 渲染 markdown
+            let html = marked.parse(markdownContent);
+            contentDiv.innerHTML = html;
+            
+            updateLoadingProgress('Markdown 渲染完成，生成目录...');
+            console.log('Markdown 渲染完成');
+            
+            // 生成目录
+            generateTableOfContents();
+            
+            // 初始化 Mermaid
+            if (typeof mermaid !== 'undefined') {
+                updateLoadingProgress('初始化 Mermaid 图表引擎...');
+                console.log('初始化 Mermaid...');
+                
+                try {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'default',
+                        securityLevel: 'loose',
+                        logLevel: 'error',
+                        flowchart: {
+                            useMaxWidth: true,
+                            htmlLabels: true,
+                            curve: 'basis'
+                        },
+                        gantt: {
+                            useMaxWidth: true,
+                            fontSize: 11,
+                            fontFamily: 'Arial, sans-serif'
+                        },
+                        gitGraph: {
+                            showBranches: true,
+                            showCommitLabel: true,
+                            mainBranchName: 'main',
+                            rotateCommitLabel: false,
+                            useMaxWidth: true
+                        },
+                        sequence: {
+                            useMaxWidth: true
+                        },
+                        journey: {
+                            useMaxWidth: true
+                        },
+                        er: {
+                            useMaxWidth: true
+                        },
+                        pie: {
+                            useMaxWidth: true
+                        },
+                        themeVariables: {
+                            git0: '#1f77b4',
+                            git1: '#ff7f0e',
+                            git2: '#2ca02c',
+                            git3: '#d62728',
+                            gitBranchLabel0: '#ffffff',
+                            gitBranchLabel1: '#ffffff',
+                            commitLabelColor: '#000000',
+                            commitLabelBackground: '#ffffff'
+                        }
+                    });
+                    
+                    // 查找所有 mermaid 代码块并转换
+                    const mermaidBlocks = contentDiv.querySelectorAll('code.language-mermaid');
+                    
+                    if (mermaidBlocks.length === 0) {
+                        updateLoadingProgress('文档加载完成（无图表）');
+                        hideLoading();
+                        return;
+                    }
+                    
+                    updateLoadingProgress(`找到 ${mermaidBlocks.length} 个 Mermaid 图表，准备渲染...`);
+                    console.log('找到', mermaidBlocks.length, '个 mermaid 图表');
+                    
+                    mermaidBlocks.forEach((block, index) => {
+                        const preElement = block.parentElement;
+                        const mermaidCode = block.textContent;
+                        
+                        console.log('处理图表', index + 1);
+                        
+                        // 创建外层容器
+                        const containerDiv = document.createElement('div');
+                        containerDiv.className = 'mermaid-container';
+                        containerDiv.id = 'chart-container-' + index;
+                        containerDiv.style.position = 'relative';
+                        
+                        // 创建 mermaid 容器
+                        const mermaidDiv = document.createElement('div');
+                        mermaidDiv.className = 'mermaid';
+                        mermaidDiv.setAttribute('data-chart-index', index); // 添加索引标记
+                        
+                        // 检测是否是甘特图，添加特殊类
+                        if (mermaidCode.trim().startsWith('gantt')) {
+                            mermaidDiv.classList.add('gantt-chart');
+                            console.log('检测到甘特图，应用特殊样式');
+                        }
+                        
+                        mermaidDiv.textContent = mermaidCode;
+                        
+                        // 创建重置按钮
+                        const resetBtn = document.createElement('button');
+                        resetBtn.className = 'chart-reset-btn';
+                        resetBtn.title = '重置图表缩放';
+                        resetBtn.setAttribute('data-chart-id', 'chart-container-' + index);
+                        resetBtn.innerHTML = '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>' +
+                            '</svg>';
+                        
+                        // 组装结构
+                        containerDiv.appendChild(mermaidDiv);
+                        containerDiv.appendChild(resetBtn);
+                        
+                        // 替换原来的 pre 元素
+                        preElement.parentNode.replaceChild(containerDiv, preElement);
+                    });
+                    
+                    // 逐个渲染 mermaid 图表（独立处理，避免一个失败影响全部）
+                    const renderPromises = [];
+                    const totalCharts = document.querySelectorAll('.mermaid').length;
+                    let renderedCount = 0;
+                    
+                    document.querySelectorAll('.mermaid').forEach((mermaidDiv, index) => {
+                        const promise = mermaid.render('mermaid-svg-' + index, mermaidDiv.textContent)
+                            .then(result => {
+                                mermaidDiv.innerHTML = result.svg;
+                                renderedCount++;
+                                updateLoadingProgress(`渲染图表 ${renderedCount}/${totalCharts}...`);
+                                console.log('图表', index + 1, '渲染成功');
+                                return { index, success: true };
+                            })
+                            .catch(error => {
+                                console.error('图表', index + 1, '渲染失败:', error);
+                                renderedCount++;
+                                updateLoadingProgress(`渲染图表 ${renderedCount}/${totalCharts} (1 个失败)...`);
+                                const originalCode = mermaidDiv.textContent;
+                                mermaidDiv.innerHTML = '<div class="text-red-500 p-3 border border-red-300 rounded bg-red-50">' +
+                                    '<strong>⚠️ 图表渲染失败</strong><br>' +
+                                    '<span class="text-sm text-red-600">错误: ' + error.message + '</span><br>' +
+                                    '<details class="mt-2">' +
+                                    '<summary class="cursor-pointer text-sm text-red-700 hover:text-red-900">查看原始代码</summary>' +
+                                    '<pre class="text-xs mt-2 p-2 bg-gray-100 text-left overflow-x-auto">' + 
+                                    originalCode.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>' +
+                                    '</details>' +
+                                    '</div>';
+                                return { index, success: false };
+                            });
+                        renderPromises.push(promise);
+                    });
+                    
+                    // 等待所有图表渲染完成（成功或失败）
+                    Promise.allSettled(renderPromises).then(() => {
+                        updateLoadingProgress('初始化图表交互功能...');
+                        console.log('所有 Mermaid 图表处理完成');
+                        
+                        // 初始化纯 JavaScript 的缩放和平移功能（只为成功渲染的图表）
+                        setTimeout(function() {
+                            document.querySelectorAll('.mermaid-container').forEach(function(container) {
+                                const svg = container.querySelector('svg');
+                                if (!svg) {
+                                    console.log('跳过未成功渲染的图表:', container.id);
+                                    return; // 跳过渲染失败的图表
+                                }
+                                
+                                const containerId = container.id;
+                                console.log('初始化交互功能:', containerId);
+                                
+                                // 状态
+                                let scale = 1;
+                                let translateX = 0;
+                                let translateY = 0;
+                                let isDragging = false;
+                                let startX, startY;
+                                
+                                // 应用变换
+                                function applyTransform() {
+                                    svg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                                }
+                                
+                                // 鼠标拖拽
+                                svg.addEventListener('mousedown', function(e) {
+                                    isDragging = true;
+                                    startX = e.clientX - translateX;
+                                    startY = e.clientY - translateY;
+                                    svg.style.cursor = 'grabbing';
+                                    e.preventDefault();
+                                });
+                                
+                                document.addEventListener('mousemove', function(e) {
+                                    if (!isDragging) return;
+                                    translateX = e.clientX - startX;
+                                    translateY = e.clientY - startY;
+                                    applyTransform();
+                                });
+                                
+                                document.addEventListener('mouseup', function() {
+                                    isDragging = false;
+                                    svg.style.cursor = 'grab';
+                                });
+                                
+                                // 滚轮缩放
+                                svg.addEventListener('wheel', function(e) {
+                                    e.preventDefault();
+                                    const delta = e.deltaY > 0 ? 0.97 : 1.03;
+                                    scale *= delta;
+                                    scale = Math.max(0.1, Math.min(10, scale));
+                                    applyTransform();
+                                });
+                                
+                                // 双击放大
+                                svg.addEventListener('dblclick', function(e) {
+                                    scale *= 1.2;
+                                    scale = Math.min(10, scale);
+                                    applyTransform();
+                                });
+                                
+                                svg.style.cursor = 'grab';
+                                svg.style.transition = 'transform 0.1s ease-out';
+                                
+                                // 保存初始状态和重置函数
+                                chartInstances.set(containerId, {
+                                    reset: function() {
+                                        scale = 1;
+                                        translateX = 0;
+                                        translateY = 0;
+                                        applyTransform();
+                                    },
+                                    zoomIn: function() {
+                                        scale *= 1.05;
+                                        scale = Math.min(10, scale);
+                                        applyTransform();
+                                    },
+                                    zoomOut: function() {
+                                        scale *= 0.95;
+                                        scale = Math.max(0.1, scale);
+                                        applyTransform();
+                                    }
+                                });
+                                
+                                console.log('图表交互已启用');
+                            });
+                            
+                            // 绑定重置按钮
+                            document.querySelectorAll('.chart-reset-btn').forEach(btn => {
+                                btn.addEventListener('click', function() {
+                                    const chartId = this.getAttribute('data-chart-id');
+                                    const chartData = chartInstances.get(chartId);
+                                    if (chartData) {
+                                        chartData.reset();
+                                        console.log('图表已重置');
+                                        
+                                        // 视觉反馈
+                                        this.style.transform = 'rotate(360deg) scale(0.9)';
+                                        setTimeout(() => {
+                                            this.style.transform = '';
+                                        }, 300);
+                                    }
+                                });
+                            });
+                            
+                            // 所有功能初始化完成，隐藏 loading
+                            updateLoadingProgress('加载完成！');
+                            hideLoading();
+                        }, 500);
+                    });
+                    
+                } catch (error) {
+                    console.error('Mermaid 初始化失败:', error);
+                    updateLoadingProgress('Mermaid 初始化失败');
+                    hideLoading();
+                }
+            } else {
+                console.error('Mermaid 库未加载');
+                updateLoadingProgress('Mermaid 库未加载');
+                hideLoading();
+            }
+            
+                // 全局键盘快捷键
+                document.addEventListener('keydown', function(e) {
+                    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                        return;
+                    }
+                    
+                    switch(e.key) {
+                        case '+':
+                        case '=':
+                            chartInstances.forEach(chartData => {
+                                chartData.zoomIn();
+                            });
+                            e.preventDefault();
+                            break;
+                        case '-':
+                            chartInstances.forEach(chartData => {
+                                chartData.zoomOut();
+                            });
+                            e.preventDefault();
+                            break;
+                        case '0':
+                            chartInstances.forEach(chartData => {
+                                chartData.reset();
+                            });
+                            e.preventDefault();
+                            break;
+                    }
+                });
+                
+        // 生成目录函数
+        function generateTableOfContents() {
+            const contentDiv = document.getElementById('content');
+            const tocList = document.getElementById('toc-list');
+            const tocSidebar = document.querySelector('.toc-sidebar');
+            const headings = contentDiv.querySelectorAll('h1, h2');
+            
+            if (headings.length === 0) {
+                if (tocSidebar) {
+                    tocSidebar.innerHTML = '<div class="text-gray-500 text-sm p-4">📑 文档无标题</div>';
+                }
+                console.log('文档中没有找到标题');
+                return;
+            }
+            
+            tocList.innerHTML = '';
+            
+            headings.forEach((heading, index) => {
+                // 为标题添加 ID
+                const id = `heading-${index}`;
+                heading.id = id;
+                
+                // 创建目录项
+                const li = document.createElement('li');
+                const level = heading.tagName.toLowerCase() === 'h2' ? 'level-2' : 'level-1';
+                li.className = `toc-item ${level}`;
+                
+                const link = document.createElement('a');
+                link.className = 'toc-link';
+                link.href = `#${id}`;
+                link.textContent = heading.textContent;
+                link.setAttribute('data-heading-id', id);
+                
+                // 点击跳转（滚动 content-main 容器）
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.getElementById(id);
+                    const contentMain = document.querySelector('.content-main');
+                    if (target && contentMain) {
+                        const targetTop = target.offsetTop - 100; // 偏移量
+                        contentMain.scrollTo({ top: targetTop, behavior: 'smooth' });
+                        
+                        // 更新活跃状态
+                        updateActiveTocItem(id);
+                    }
+                });
+                
+                li.appendChild(link);
+                tocList.appendChild(li);
+            });
+            
+            console.log(`生成了 ${headings.length} 个目录项`);
+            
+            // 初始化滚动监听
+            initScrollSpy();
+        }
+        
+        // 滚动监听 - 高亮当前阅读位置
+        function initScrollSpy() {
+            const headings = document.querySelectorAll('#content h1, #content h2');
+            const contentMain = document.querySelector('.content-main');
+            
+            if (headings.length === 0 || !contentMain) return;
+            
+            // 创建 Intersection Observer，监听 content-main 容器中的滚动
+            const observerOptions = {
+                root: contentMain, // 监听 content-main 容器
+                rootMargin: '-20% 0px -70% 0px', // 当标题在容器 20% 位置时激活
+                threshold: 0
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        updateActiveTocItem(entry.target.id);
+                    }
+                });
+            }, observerOptions);
+            
+            headings.forEach(heading => {
+                observer.observe(heading);
+            });
+            
+            console.log('滚动监听已初始化，监听', headings.length, '个标题');
+        }
+        
+        // 更新目录活跃状态
+        function updateActiveTocItem(headingId) {
+            const tocLinks = document.querySelectorAll('.toc-link');
+            const tocSidebar = document.querySelector('.toc-sidebar');
+            
+            tocLinks.forEach(link => {
+                if (link.getAttribute('data-heading-id') === headingId) {
+                    link.classList.add('active');
+                    // 滚动目录到可视区域
+                    if (tocSidebar) {
+                        const linkTop = link.offsetTop;
+                        const sidebarScrollTop = tocSidebar.scrollTop;
+                        const sidebarHeight = tocSidebar.clientHeight;
+                        
+                        // 如果链接不在可见区域，滚动到可见区域
+                        if (linkTop < sidebarScrollTop || linkTop > sidebarScrollTop + sidebarHeight - 100) {
+                            tocSidebar.scrollTo({ top: linkTop - 100, behavior: 'smooth' });
+                        }
+                    }
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+        
+        // 侧边栏切换功能
+        const filesToggle = document.getElementById('files-toggle');
+        const filesSidebar = document.getElementById('files-sidebar');
+        const tocToggle = document.getElementById('toc-toggle');
+        const tocSidebar = document.getElementById('toc-sidebar');
+        
+        if (filesToggle && filesSidebar) {
+            filesToggle.addEventListener('click', function() {
+                filesSidebar.classList.toggle('show-mobile');
+                
+                // 更新按钮图标
+                const svg = this.querySelector('svg');
+                const span = this.querySelector('span');
+                if (filesSidebar.classList.contains('show-mobile')) {
+                    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+                    span.textContent = '关闭';
+                } else {
+                    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>';
+                    span.textContent = '文档';
+                }
+            });
+        }
+        
+        if (tocToggle && tocSidebar) {
+            tocToggle.addEventListener('click', function() {
+                tocSidebar.classList.toggle('show-mobile');
+                
+                // 更新按钮图标
+                const svg = this.querySelector('svg');
+                const span = this.querySelector('span');
+                if (tocSidebar.classList.contains('show-mobile')) {
+                    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+                    span.textContent = '关闭';
+                } else {
+                    svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>';
+                    span.textContent = '目录';
+                }
+            });
+        }
+        
+        });
+        
+        // 下载Markdown文档
+        function downloadMarkdown() {
+            const filePath = document.getElementById('markdownFilePath').value;
+            const contentPath = document.getElementById('markdownContentPath').value;
+            
+            // 获取文件名
+            let fileName = filePath.split('/').pop() || 'document.md';
+            
+            // 确保文件有.md扩展名
+            if (!fileName.endsWith('.md') && !fileName.endsWith('.markdown')) {
+                fileName += '.md';
+            }
+            
+            // 创建下载链接
+            const a = document.createElement('a');
+            a.href = contentPath;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+    
+    <!-- 数学公式支持 - MathJax -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                tags: 'ams'
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'a']
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</body>
+</html>
